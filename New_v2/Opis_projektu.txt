@@ -1,0 +1,75 @@
+GameBuddyBrain — opis projektu (24.08.2025)
+
+1) Cel i skrót opisu
+- Desktopowy asystent/bot do Idle Zombie Wave (WPF/.NET 8) działający lokalnie.
+- Automatyzuje: Start/Next/Claim, farmienie (ruch + zbiór XP), sklep (zakup/upgrade/sprzedaż), skrzynie, perki, umiejętności i speed boost.
+- Działa przez ukierunkowane kliknięcia/klawisze do uchwytu okna gry + lekki overlay.
+
+2) Technologia
+- .NET 8 (Windows), WPF, single-file self-contained publish.
+- VisionService: szablony/ROI + heurystyki kolorów; Clicker: klik absolutny/znormalizowany i klawiatura; GameDetector: attach + foreground.
+- BrainService: pętla bota, harmonogram rutyn, FSM (Search/MainMenu/LevelUp/Playing/Shopping/Prestige/Rewards/Recovering).
+
+3) Kluczowe funkcje (stan obecny)
+- Ruch i XP: losowe sekwencje WASD, okazjonalne kliknięcia walki.
+- Next/Claim: priorytetowe wykrywanie i klikanie; Speed/Skills: okresowe aktywacje.
+- Sklep: preferencje typów, minimalna rzadkość, bias na duplikaty/owned; auto-sell najsłabszych nie-czerwonych.
+- Perki: wybór najlepszej rzadkości (priorytet 2/3/1), cooldown skanowania.
+- Bezpieczeństwo: pauza przy aktywności użytkownika (heurystyczna), Anti-AFK (mikro-ruch), auto-focus okna.
+- Tryby: Podstawowy/Zaawansowany/Niesamowity z różnymi cooldownami i agresywnością.
+
+4) Architektura (warstwy)
+- BrainService (decyzje + FSM + scheduler), VisionService (detekcja UI), Clicker (input), GameDetector (okno), SystemMonitor/Settings/Hotkeys/TemplateCatalog.
+
+5) Budowanie i publikacja
+- Skrypt: zip_publish.ps1 (Build/Publish Release, skrót na pulpicie, ZIP publish i projektowy).
+- Wyjście: C:\Users\xpini\Desktop\New_v2\publish\GameBuddyBrain.exe; Skrót: C:\Users\xpini\Desktop\GameBuddyBrain.lnk
+
+6) Uruchomienie
+- Uruchom skrót lub EXE z folderu publish; włącz bota po podpięciu okna gry.
+
+7) Ustawienia (wybór)
+- AutoFarm, AutoPrestige, AutoCollect, AutoBuyBest, AutoChests, AutoSkills, UseSpeedBoost, Anti-AFK.
+- Cooldowny: buyCooldown, prestigeCooldown, nextTimeout, noProgressPrestige; preferencje sklepu i minimalna rzadkość.
+
+8) Ograniczenia
+- Czułość na motywy/rozdzielczości (potrzeba strojenia ROI/progów); heurystyki mogą wymagać adaptacji.
+
+9) Propozycje ulepszeń (plan wysokiego poziomu)
+1. System Adiutantów i Transformacji Drużyny
+   - Wykrywanie i wybór adiutantów; optymalizacja adiutant+ocalali; stan FSM: AdjutantSelection.
+2. Zarządzanie Przedmiotami Roguelike (200+)
+   - Wykrywanie rzadkości/typów; scoring wartości; auto sell/keep wg polityk.
+3. Strategia Walki z Bossami
+   - Detekcja bossów; stan FSM: BossFight; przygotowanie formacji.
+4. System Ocalałych i Formacji
+   - Rozpoznawanie 25+ typów; optymalne formacje vs. typ wroga; rotacja ocalałych.
+5. Codzienne Misje i Wydarzenia
+   - Stan FSM: DailyMissions; auto-wykonywanie misji; kalendarz eventów.
+6. Neurolink Upgrades Management
+   - Detekcja Neurolink; planowanie upgradów; integracja z długoterminową progresją.
+7. Multi-Mode Strategy System
+   - Rozpoznawanie trybów gry; taktyki per tryb; auto-przełączanie.
+8. Enhanced XP i Resource Management
+   - Optymalizacja XP packów, biletów; priorytety zasobów.
+9. Advanced UI Detection dla Nowych Elementów
+   - TemplateCatalog: adiutanci/bossy/misje/eventy/Neurolink.
+10. Tryb "Event Optimization"
+   - Preset Event Mode; oszczędzanie zasobów przed eventami; harmonogram użyć.
+11. Boss Strategy Database
+   - Baza wzorców bossów + auto-dobór; uczenie skutecznych taktyk.
+12. Advanced Analytics Dashboard
+   - Zakładka Statystyki: progression rate, boss defeat rate, resource efficiency; wykresy.
+13. Community Integration Features
+   - Import/eksport strategii; sharing buildów; integracje społecznościowe (np. linki do Reddit).
+14. Multi-Platform Synchronization
+   - Warianty Steam/F2P; emulatory Android; synchronizacja ustawień.
+15. AI-Powered Strategy Evolution
+   - ML do rekomendacji i adaptacji; predykcje kombinacji na podstawie historii.
+
+10) Mapa drogowa (skrót)
+- Faza A: rozszerzenia Vision/TemplateCatalog, nowe modele (Adjutant/Survivor/RogueItem/BossType).
+- Faza B: FSM — AdjutantSelection/BossFight/DailyMissions/EventMode.
+- Faza C: polityki scoringu + baza strategii bossów.
+- Faza D: UX — Zakładka Statystyki, import/eksport, preset Event Mode.
+- Faza E: multi-mode i wstępne ML.

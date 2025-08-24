@@ -1,8 +1,34 @@
 <Window x:Class="GameBuddyBrain.UI.OverlayWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="OverlayWindow" Height="200" Width="400">
-    <Grid>
-        <TextBlock Text="Overlay Window" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20"/>
-    </Grid>
+    Title="GameBuddyBrain"
+    Width="400" Height="300"
+    WindowStyle="None"
+    AllowsTransparency="True"
+    Background="#20000000"
+    Topmost="True"
+    ShowInTaskbar="False"
+    SnapsToDevicePixels="True"
+    UseLayoutRounding="True"
+    Focusable="False"
+    ResizeMode="NoResize">
+  <Canvas x:Name="RootCanvas" IsHitTestVisible="False">
+    <!-- NEXT highlight -->
+    <Border x:Name="NextRect" CornerRadius="5" Visibility="Collapsed"
+            Width="0" Height="0" Background="#2000FF00" BorderBrush="#A0FFB86C" BorderThickness="2">
+      <Border.Effect>
+        <DropShadowEffect BlurRadius="10" Color="#80FFB86C" ShadowDepth="0"/>
+      </Border.Effect>
+    </Border>
+    <TextBlock x:Name="NextLabel" Text="NEXT" Foreground="#C0FFB86C" FontWeight="Bold" Visibility="Collapsed"/>
+
+    <!-- CLAIM highlight -->
+    <Border x:Name="ClaimRect" CornerRadius="5" Visibility="Collapsed"
+            Width="0" Height="0" Background="#200000FF" BorderBrush="#A0BD93F9" BorderThickness="2">
+      <Border.Effect>
+        <DropShadowEffect BlurRadius="10" Color="#8093F9" ShadowDepth="0"/>
+      </Border.Effect>
+    </Border>
+    <TextBlock x:Name="ClaimLabel" Text="CLAIM" Foreground="#C093F9" FontWeight="Bold" Visibility="Collapsed"/>
+  </Canvas>
 </Window>
