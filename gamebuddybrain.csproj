@@ -1,17 +1,68 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<UseWindowsForms>true</UseWindowsForms>
+		<AssemblyName>GameBuddyBrain</AssemblyName>
+		<RootNamespace>GameBuddyBrain</RootNamespace>
+		<StartupObject>GameBuddyBrain.Program</StartupObject>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>false</ImplicitUsings>
+		<EnableDefaultItems>false</EnableDefaultItems>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<SelfContained>true</SelfContained>
+		<PublishSingleFile>true</PublishSingleFile>
+		<IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<PublishTrimmed>false</PublishTrimmed>
+		<PublishDir>$(USERPROFILE)\Desktop\New_v2\publish\</PublishDir>
+		<DefaultItemExcludes>$(DefaultItemExcludes);archive\**\*;GameBuddyBrainNew\**\*;GameBuddyBrain-v*\**\*;GameBuddyBrain-release\**\*</DefaultItemExcludes>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
-    <UseWPF>true</UseWPF>
-    <RootNamespace>GameBuddyBrain</RootNamespace>
-    <AssemblyName>GameBuddyBrain</AssemblyName>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<!-- Ensure Release doesn't emit PDBs and strips debug info -->
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+		<DebugSymbols>false</DebugSymbols>
+		<DebugType>none</DebugType>
+		<GenerateDocumentationFile>false</GenerateDocumentationFile>
+	</PropertyGroup>
+  
+	<ItemGroup>
+		<Compile Remove="**\*.cs" />
+		<Page Remove="**\*.xaml" />
+		<Resource Remove="**\*.*" />
+		<ApplicationDefinition Remove="**\*.xaml" />
+		<None Remove="**\*.*" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="WindowsInput" Version="1.0.4" />
-  </ItemGroup>
+	<ItemGroup>
+		<ApplicationDefinition Include="App.xaml" />
+		<Compile Include="App.xaml.cs" />
+		<None Include="app.manifest" />
+		<Compile Include="src\**\*.cs" />
+		<Page Include="src\**\*.xaml" />
+		<Resource Include="src\**\*.*" Exclude="**\bin\**;**\obj\**;src\**\*.cs;src\**\*.xaml" />
+	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Remove="GameBuddyBrainNew\**\*.cs" />
+		<Page Remove="GameBuddyBrainNew\**\*.xaml" />
+		<Resource Remove="GameBuddyBrainNew\**\*.*" />
+		<None Remove="GameBuddyBrainNew\**\*.*" />
+		<Compile Remove="archive\**\*.cs" />
+		<Page Remove="archive\**\*.xaml" />
+		<Resource Remove="archive\**\*.*" />
+		<None Remove="archive\**\*.*" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="System.Drawing.Common" Version="8.0.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.WindowsDesktop.App.WPF" />
+		<FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" />
+	</ItemGroup>
 </Project>

@@ -1,0 +1,41 @@
+# Build outputs
+bin/
+obj/
+.vs/
+*.user
+*.userosscache
+*.suo
+*.cache
+*.pdb
+
+# Publish artifacts
+New_v2/publish/
+New_v2/*.zip
+/GameBuddyBrain-release/
+/GameBuddyBrain_project.zip
+/GameBuddyBrain_publish.zip
+
+# Logs and temp
+*.log
+[Tt]emp/
+*.tmp
+
+# OS files
+Thumbs.db
+.DS_Store
+$RECYCLE.BIN/
+
+# Rider/VS Code
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Archives
+*.zip
+*.7z
+*.rar
+
+# Local scripts output
+**/PublishOutputs.*.txt

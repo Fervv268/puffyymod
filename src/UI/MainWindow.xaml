@@ -1,0 +1,435 @@
+<Window x:Class="GameBuddyBrain.UI.MainWindow" 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+    Title="GameBuddyBrain - Panel sterowania" 
+    Height="350" Width="500" 
+    Background="Transparent"
+    AllowsTransparency="True"
+    ResizeMode="CanResize"
+    MinHeight="300" MinWidth="400"
+    WindowStyle="None"
+    SnapsToDevicePixels="True"
+    UseLayoutRounding="True">
+
+    <Window.Resources>
+        <!-- Styl przełącznika (switch) dla ToggleButton -->
+        <Style x:Key="SwitchToggleStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="58"/>
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Background" Value="#555"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#444"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid>
+                            <Border x:Name="SwitchBg" CornerRadius="14" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"/>
+                            <Ellipse x:Name="Knob" Width="22" Height="22" Fill="White" Margin="3,3,33,3"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="SwitchBg" Property="Background" Value="#238636"/>
+                                <Setter TargetName="Knob" Property="Margin" Value="33,3,3,3"/>
+                            </Trigger>
+                            <EventTrigger RoutedEvent="PreviewMouseLeftButtonDown">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Knob" Storyboard.TargetProperty="Opacity" To="0.8" Duration="0:0:0.1" AutoReverse="True"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- Delikatna animacja hover dla przycisków -->
+        <Style TargetType="Button">
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <TranslateTransform Y="0"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.9"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <!-- Info badge '!' with hover tooltip animation (simple opacity change) -->
+        <Style x:Key="InfoBadgeButton" TargetType="Button">
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#FFD54F"/>
+            <Setter Property="Background" Value="#2D333B"/>
+            <Setter Property="BorderBrush" Value="#444"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Content" Value="!"/>
+            <Setter Property="ToolTipService.ShowDuration" Value="60000"/>
+            <Setter Property="Opacity" Value="0.85"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="1"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <!-- Outer rounded container to simulate rounded window without WindowChrome -->
+    <Border Background="#0B0E14" CornerRadius="8" Padding="0">
+    <DockPanel LastChildFill="True" Margin="8">
+        <!-- Custom title bar -->
+        <Border DockPanel.Dock="Top" Background="#161B22" CornerRadius="8,8,0,0" Padding="8" Margin="0,0,0,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="GameBuddyBrain - Panel sterowania" Foreground="White" FontWeight="Bold" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="BtnMinimize" Content="—" Width="32" Height="28" Margin="0,0,6,0" Background="#2D333B" Foreground="White" BorderThickness="0" Click="BtnMinimize_Click"/>
+                    <Button x:Name="BtnClose" Content="✕" Width="32" Height="28" Background="#DA3633" Foreground="White" BorderThickness="0" Click="BtnClose_Click"/>
+                </StackPanel>
+            </Grid>
+            <Border.InputBindings>
+                <MouseBinding Gesture="LeftClick" Command="ApplicationCommands.NotACommand"/>
+            </Border.InputBindings>
+            <Border.Style>
+                <Style TargetType="Border">
+                    <EventSetter Event="MouseLeftButtonDown" Handler="TitleBar_MouseLeftButtonDown"/>
+                </Style>
+            </Border.Style>
+        </Border>
+        <!-- Stopka -->
+        <Border DockPanel.Dock="Bottom" Background="#21262D" CornerRadius="0,0,8,8" Padding="10" Margin="0,8,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <WrapPanel Grid.Column="0" VerticalAlignment="Center" ItemHeight="28" ItemWidth="Auto">
+                    <TextBlock Text="Bot" Foreground="#8B949E" VerticalAlignment="Center"/>
+                    <ToggleButton x:Name="BottomMasterToggle" Style="{StaticResource SwitchToggleStyle}" Margin="8,0,16,0"
+                                  Checked="BottomMasterToggle_Checked" Unchecked="BottomMasterToggle_Unchecked"/>
+                    <TextBlock Text="Tryb:" Foreground="#8B949E" Margin="8,0,6,0" VerticalAlignment="Center"/>
+                    <!-- Tryb jako kompaktowe zakładki, bez wymuszonej szerokości -->
+                    <TabControl x:Name="ModeTabs" Background="#161B22" BorderBrush="#2D333B" Padding="0" 
+                                HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TabItem Header="Podstawowy"/>
+                        <TabItem Header="Zaawansowany"/>
+                        <TabItem Header="Niesamowity"/>
+                    </TabControl>
+                </WrapPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Ustawienia" Background="#2D333B" Foreground="#8B949E" BorderThickness="1" BorderBrush="#444C56" Padding="10,6" Margin="0,0,8,0" Click="Settings_Click"/>
+                    <Button Content="O programie" Background="#2D333B" Foreground="#8B949E" BorderThickness="1" BorderBrush="#444C56" Padding="10,6" Click="About_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Zakładki główne -->
+    <TabControl Background="#0B0E14">
+            <!-- GŁÓWNA: główne funkcje i kolejka trybów -->
+            <TabItem Header="Główna">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <!-- Idealny start + status strategii -->
+                    <Border Grid.Row="0" Background="#0F141A" CornerRadius="6" Padding="8" Margin="8,8,8,4">
+                        <DockPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="StartIdealBtn" Content="⭐ Start idealny farm bot" Background="#238636" Foreground="White" BorderThickness="0" Padding="12,6" Click="StartIdealBtn_Click"/>
+                                <Button x:Name="ToggleOverlayBtn" Content="🖼 Podgląd (overlay)" Background="#2D333B" Foreground="White" BorderThickness="0" Padding="12,6" Margin="8,0,0,0" Click="ToggleOverlayBtn_Click"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                                <TextBlock Text="Strategia:" Foreground="#8B949E" VerticalAlignment="Center" Margin="8,0,4,0"/>
+                                <TextBlock x:Name="StrategyText" Text="-" Foreground="White" VerticalAlignment="Center"/>
+                                <TextBlock Text=" • Wynik:" Foreground="#8B949E" VerticalAlignment="Center" Margin="8,0,4,0"/>
+                                <TextBlock x:Name="PerfText" Text="0" Foreground="White" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                    <!-- Pasek statusu wykrywania gry -->
+                    <Border Grid.Row="1" Background="#0F141A" CornerRadius="6" Padding="8" Margin="8,4,8,4">
+                        <DockPanel>
+                            <TextBlock Text="Status wykrywania gry:" Foreground="#8B949E" VerticalAlignment="Center"/>
+                            <ProgressBar x:Name="DetectProgress" Minimum="0" Maximum="100" Height="8" Margin="8,0,0,0" Width="220" Value="0"/>
+                            <TextBlock x:Name="DetectLabel" Text="—" Foreground="#8B949E" Margin="8,0,0,0"/>
+                        </DockPanel>
+                    </Border>
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="8">
+                        <TextBlock Text="🤖 Farm Bot" Foreground="White" FontSize="18" FontWeight="Bold" Margin="0,0,0,8"/>
+
+                        <!-- Master: Farma + XP (zbieranie) -->
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Farma + XP (master)" Foreground="White" VerticalAlignment="Center"/>
+                            <ToggleButton x:Name="MasterFarmToggle" Grid.Column="1" Style="{StaticResource SwitchToggleStyle}"
+                                          Checked="MasterFarm_Checked" Unchecked="MasterFarm_Unchecked"/>
+                        </Grid>
+
+                        <!-- Start/Stop -->
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="StartBotBtn" Content="▶ Start" Background="#238636" Foreground="White" FontSize="14" FontWeight="Bold" Height="36" Width="100" Margin="0,0,8,0" BorderThickness="0" Click="StartBot_Click"/>
+                            <Button x:Name="StopBotBtn" Content="⏹ Stop" Background="#DA3633" Foreground="White" FontSize="14" FontWeight="Bold" Height="36" Width="100" BorderThickness="0" Click="StopBot_Click"/>
+                            <Button Content="🎯 Skup (Focus)" Background="#2D333B" Foreground="White" Height="36" Margin="8,0,0,0" Click="FocusWindow_Click"/>
+                        </StackPanel>
+
+                        <!-- Przełączniki (switch) -->
+                        <TextBlock Text="Przełączniki" Foreground="#8B949E" FontSize="12" Margin="0,10,0,6"/>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Zbieraj wszystko" Foreground="White" VerticalAlignment="Center"/>
+                            <ToggleButton x:Name="AutoCollectToggle" Grid.Column="1" Style="{StaticResource SwitchToggleStyle}" Checked="AutoCollect_Checked" Unchecked="AutoCollect_Unchecked"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Otwieraj skrzynie" Foreground="White" VerticalAlignment="Center"/>
+                            <ToggleButton x:Name="AutoChestsToggle" Grid.Column="1" Style="{StaticResource SwitchToggleStyle}" Checked="AutoChests_Checked" Unchecked="AutoChests_Unchecked"/>
+                        </Grid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Kupuj najlepsze" Foreground="White" VerticalAlignment="Center"/>
+                            <ToggleButton x:Name="AutoBuyBestToggle" Grid.Column="1" Style="{StaticResource SwitchToggleStyle}" Checked="AutoBuyBest_Checked" Unchecked="AutoBuyBest_Unchecked"/>
+                        </Grid>
+
+                        <!-- Automatyzacja podstawowa -->
+                        <TextBlock Text="Automatyzacja" Foreground="#8B949E" FontSize="12" Margin="0,10,0,6"/>
+                        <WrapPanel>
+                            <CheckBox x:Name="AutoFarmCheck" Content="Auto farma" Foreground="White" Margin="0,0,12,6" Checked="AutoFarm_Checked" Unchecked="AutoFarm_Unchecked"/>
+                            <CheckBox x:Name="AutoPrestigeCheck" Content="Auto prestiż" Foreground="White" Margin="0,0,12,6" Checked="AutoPrestige_Checked" Unchecked="AutoPrestige_Unchecked"/>
+                            <CheckBox x:Name="SafeModeCheck" Content="Tryb bezpieczny" Foreground="White" Margin="0,0,12,6" IsChecked="True" Checked="SafeMode_Checked" Unchecked="SafeMode_Unchecked"/>
+                        </WrapPanel>
+
+                        <!-- Tryby gry (kolejka) -->
+                        <Border Background="#161B22" CornerRadius="6" Padding="10" Margin="0,6,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Tryby gry (zaznacz kilka – będą uruchamiane po kolei)" Foreground="#8B949E" FontSize="12" Margin="0,0,0,6"/>
+                                <ListBox x:Name="TrybyGryList" SelectionMode="Extended" Background="#0F141A" Foreground="White" BorderBrush="#2D333B" Height="120"/>
+                                <WrapPanel Margin="0,6,0,0">
+                                    <TextBlock Text="Auto restart gry" Foreground="#8B949E" VerticalAlignment="Center"/>
+                                    <ToggleButton x:Name="AutoRestartToggle" Style="{StaticResource SwitchToggleStyle}" Margin="8,0,0,0" Checked="AutoRestart_Checked" Unchecked="AutoRestart_Unchecked"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Idle Zombie Wave -->
+                        <Border Background="#161B22" CornerRadius="6" Padding="10" Margin="0,6,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Idle Zombie Wave" Foreground="#8B949E" FontSize="12" Margin="0,0,0,6"/>
+                                <WrapPanel>
+                                    <CheckBox x:Name="AutoSkillsCheck" Content="Auto umiejętności" Foreground="White" Margin="0,0,12,6" Checked="AutoSkills_Checked" Unchecked="AutoSkills_Unchecked"/>
+                                    <CheckBox x:Name="UseSpeedBoostCheck" Content="Przyspieszenie" Foreground="White" Margin="0,0,12,6" Checked="UseSpeedBoost_Checked" Unchecked="UseSpeedBoost_Unchecked"/>
+                                </WrapPanel>
+                                <WrapPanel>
+                                    <TextBlock Text="Umiejętności co (s):" Foreground="#8B949E" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="SkillIntervalBox" Width="50" Margin="6,0,0,0" Text="30"/>
+                                    <Button Content="Zastosuj" Margin="6,0,0,0" Click="ApplySkillInterval_Click"/>
+                                    <TextBlock Text="Boost co (s):" Foreground="#8B949E" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="SpeedBoostEveryBox" Width="50" Margin="6,0,0,0" Text="40"/>
+                                    <Button Content="Zastosuj" Margin="6,0,0,0" Click="ApplySpeedBoostEvery_Click"/>
+                                </WrapPanel>
+                                <WrapPanel Margin="0,6,0,0">
+                                    <CheckBox x:Name="Skill1Check" Content="S1" Foreground="White" Margin="0,0,8,0" Checked="Skill1_Checked" Unchecked="Skill1_Unchecked"/>
+                                    <CheckBox x:Name="Skill2Check" Content="S2" Foreground="White" Margin="0,0,8,0" Checked="Skill2_Checked" Unchecked="Skill2_Unchecked"/>
+                                    <CheckBox x:Name="Skill3Check" Content="S3" Foreground="White" Margin="0,0,8,0" Checked="Skill3_Checked" Unchecked="Skill3_Unchecked"/>
+                                    <CheckBox x:Name="Skill4Check" Content="S4" Foreground="White" Checked="Skill4_Checked" Unchecked="Skill4_Unchecked"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+            <!-- System -->
+                        <Border Background="#161B22" CornerRadius="6" Padding="10" Margin="0,6,0,0">
+                            <StackPanel>
+                <TextBlock Text="System" Foreground="White" FontSize="14" FontWeight="Bold" Margin="0,0,0,6"/>
+                                <TextBlock x:Name="SystemInfoText" Text="Loading system info..." Foreground="#8B949E" FontSize="11" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                    </ScrollViewer>
+        </Grid>
+            </TabItem>
+
+            <!-- Rodzaj broni / Sklep -->
+            <TabItem Header="Rodzaj broni">
+                <StackPanel Margin="12">
+                    <TextBlock Text="Sklep i preferencje" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                    <TextBlock Text="Zawsze kupuj najwyższą klasę: Czerwony > Różowy > Niebieski > Szary" Foreground="#8B949E" FontSize="12" Margin="0,4,0,8"/>
+                    <UniformGrid Columns="2" Rows="2" Margin="0,0,0,6">
+                        <Border Background="#2D333B" CornerRadius="6" Padding="8" Margin="0,0,6,6"><TextBlock Text="SZARY - najsłabszy" Foreground="#8B949E"/></Border>
+                        <Border Background="#2D333B" CornerRadius="6" Padding="8" Margin="6,0,0,6"><TextBlock Text="NIEBIESKI - średni" Foreground="#8B949E"/></Border>
+                        <Border Background="#2D333B" CornerRadius="6" Padding="8" Margin="0,6,6,0"><TextBlock Text="RÓŻOWY - ok" Foreground="#8B949E"/></Border>
+                        <Border Background="#2D333B" CornerRadius="6" Padding="8" Margin="6,6,0,0"><TextBlock Text="CZERWONY - MEGA (nie sprzedajemy)" Foreground="#8B949E"/></Border>
+                    </UniformGrid>
+
+                    <TextBlock Text="Preferowane typy broni" Foreground="#8B949E" FontSize="12"/>
+                    <WrapPanel Margin="0,4,0,8">
+                        <CheckBox x:Name="PreferElementalCheck" Content="🔥 Elemental" Foreground="White" Margin="0,0,12,0" Checked="PreferElemental_Checked" Unchecked="PreferElemental_Unchecked"/>
+                        <CheckBox x:Name="PreferBallisticCheck" Content="🏹 Ballistic" Foreground="White" Margin="0,0,12,0" Checked="PreferBallistic_Checked" Unchecked="PreferBallistic_Unchecked"/>
+                        <CheckBox x:Name="PreferExplosiveCheck" Content="💣 Explosive" Foreground="White" Margin="0,0,12,0" Checked="PreferExplosive_Checked" Unchecked="PreferExplosive_Unchecked"/>
+                        <CheckBox x:Name="PreferEnergyCheck" Content="⚡ Energy" Foreground="White" Checked="PreferEnergy_Checked" Unchecked="PreferEnergy_Unchecked"/>
+                    </WrapPanel>
+
+                    <WrapPanel>
+                        <TextBlock Text="Minimalna klasa zakupu:" Foreground="#8B949E" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="MinRarityCombo" Width="120" Margin="8,0,0,0" SelectionChanged="MinRarityCombo_SelectionChanged">
+                            <ComboBoxItem Content="Szary"/>
+                            <ComboBoxItem Content="Niebieski"/>
+                            <ComboBoxItem Content="Różowy"/>
+                            <ComboBoxItem Content="Czerwony"/>
+                        </ComboBox>
+                        <CheckBox x:Name="BuyOnlyPreferredCheck" Content="Tylko preferowane typy" Foreground="White" Margin="12,0,0,0" Checked="BuyOnlyPreferred_Checked" Unchecked="BuyOnlyPreferred_Unchecked"/>
+                    </WrapPanel>
+
+                    <Border Background="#161B22" CornerRadius="6" Padding="8" Margin="0,8,0,0">
+                        <TextBlock Text="Jeśli brak miejsca w ekwipunku: automatyczna sprzedaż najsłabszej (szary→niebieski→różowy). Czerwonych nie sprzedajemy." Foreground="#8B949E" FontSize="11" TextWrapping="Wrap"/>
+                    </Border>
+                </StackPanel>
+            </TabItem>
+
+            <!-- Automatyzacja (szczegóły) -->
+            <TabItem Header="Automatyzacja">
+                <StackPanel Margin="12">
+                    <TextBlock Text="Szczegóły automatyzacji" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                    <WrapPanel Margin="0,8,0,0">
+                        <CheckBox x:Name="AutoFarmCheck2" Content="Auto farma" Foreground="White" Margin="0,0,12,6" Checked="AutoFarm_Checked" Unchecked="AutoFarm_Unchecked"/>
+                        <CheckBox x:Name="AutoPrestigeCheck2" Content="Auto prestiż" Foreground="White" Margin="0,0,12,6" Checked="AutoPrestige_Checked" Unchecked="AutoPrestige_Unchecked"/>
+                        <CheckBox x:Name="SafeModeCheck2" Content="Tryb bezpieczny" Foreground="White" Margin="0,0,12,6" Checked="SafeMode_Checked" Unchecked="SafeMode_Unchecked"/>
+                    </WrapPanel>
+                    <TextBlock Text="Ustawienia skilli i prędkości" Foreground="#8B949E" FontSize="12"/>
+                    <WrapPanel>
+                        <TextBlock Text="Umiejętności co (s):" Foreground="#8B949E" VerticalAlignment="Center"/>
+                        <TextBox x:Name="SkillIntervalBox2" Width="50" Margin="6,0,0,0" Text="30"/>
+                        <Button Content="Zastosuj" Margin="6,0,0,0" Click="ApplySkillInterval_Click"/>
+                        <TextBlock Text="Boost co (s):" Foreground="#8B949E" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                        <TextBox x:Name="SpeedBoostEveryBox2" Width="50" Margin="6,0,0,0" Text="40"/>
+                        <Button Content="Zastosuj" Margin="6,0,0,0" Click="ApplySpeedBoostEvery_Click"/>
+                    </WrapPanel>
+                </StackPanel>
+            </TabItem>
+
+            <!-- Broń (katalog szablonów i miniaturki) -->
+            <TabItem Header="Broń">
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Row="0">
+                        <TextBlock Text="Katalog broni (szablony)" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                        <Button Style="{StaticResource InfoBadgeButton}" Margin="8,0,0,0">
+                            <Button.ToolTip>
+                                <ToolTip Content="Skany obrazów z Desktop\ww11\ww11. Deduplikacja po hash, generowanie miniaturek, automatyczna klasyfikacja typu (4)."/>
+                            </Button.ToolTip>
+                        </Button>
+                        <Button Content="Odśwież" Background="#2D333B" Foreground="White" BorderThickness="0" Margin="12,0,0,0" Click="RefreshTemplates_Click"/>
+                    </DockPanel>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="TemplatesItems">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#161B22" CornerRadius="6" Padding="6" Margin="6">
+                                        <StackPanel Width="180">
+                                            <Image Source="{Binding ThumbPath}" Width="168" Height="Auto" Stretch="Uniform"/>
+                                            <TextBlock Text="{Binding Key}" Foreground="White" FontSize="12" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding Type}" Foreground="#8B949E" FontSize="11"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+
+            <!-- Sekwencje -->
+            <TabItem Header="Sekwencje">
+                <StackPanel Margin="12">
+                    <TextBlock Text="Definicje sekwencji" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                    <TextBlock Text="Sekwencje opisują kroki: Wykryj grę → Start farmy → Chodzenie + XP → Sklep → Perki → Następna fala." Foreground="#8B949E" TextWrapping="Wrap" Margin="0,4,0,8"/>
+                    <WrapPanel>
+                        <Button Content="Uruchom sekwencję: Pełna Farma" Background="#238636" Foreground="White" BorderThickness="0" Click="RunSeq_FullFarm_Click"/>
+                        <Button Content="Zatrzymaj wszystkie" Background="#DA3633" Foreground="White" BorderThickness="0" Margin="8,0,0,0" Click="StopAllSequences_Click"/>
+                    </WrapPanel>
+                    <ListBox x:Name="SeqLog" Background="#0F141A" Foreground="White" BorderBrush="#2D333B" Height="180" Margin="0,8,0,0"/>
+                </StackPanel>
+            </TabItem>
+
+            <!-- Proces / Podłączenie ("inject") -->
+            <TabItem Header="Proces">
+                <StackPanel Margin="12">
+                    <TextBlock Text="Podłącz do procesu gry (bez iniekcji kodu)" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                    <WrapPanel Margin="0,8,0,8">
+                        <TextBox x:Name="AttachByNameBox" Width="160" Margin="0,0,6,0"/>
+                        <Button Content="Podłącz po nazwie" Background="#2D333B" Foreground="White" BorderThickness="0" Click="AttachByName_Click"/>
+                    </WrapPanel>
+                    <WrapPanel Margin="0,0,0,8">
+                        <TextBox x:Name="AttachByTitleBox" Width="220" Margin="0,0,6,0"/>
+                        <Button Content="Podłącz po tytule" Background="#2D333B" Foreground="White" BorderThickness="0" Click="AttachByTitle_Click"/>
+                    </WrapPanel>
+                    <WrapPanel>
+                        <Button Content="Odśwież listę" Background="#6F42C1" Foreground="White" BorderThickness="0" Click="RefreshCandidates_Click"/>
+                        <Button Content="Podłącz zaznaczony" Background="#238636" Foreground="White" BorderThickness="0" Margin="8,0,0,0" Click="AttachSelected_Click"/>
+                    </WrapPanel>
+                    <ListBox x:Name="ProcessList" Background="#0F141A" Foreground="White" BorderBrush="#2D333B" Height="180" Margin="0,8,0,0"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+        
+        <!-- Dodatkowe zakładki: Statystyki i Wydarzenia -->
+        <TabControl Background="#0B0E14" Margin="0,8,0,0">
+            <TabItem Header="Statystyki">
+                <StackPanel Margin="12">
+                    <TextBlock Text="Panel statystyk (beta)" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                    <WrapPanel Margin="0,8,0,0">
+                        <TextBlock Text="Akcje łącznie:" Foreground="#8B949E" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="StatsTotalActions" Text="0" Foreground="White" Margin="8,0,0,0"/>
+                        <TextBlock Text="Skuteczność:" Foreground="#8B949E" Margin="16,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="StatsSuccess" Text="0%" Foreground="White" Margin="8,0,0,0"/>
+                        <TextBlock Text="Czas pracy:" Foreground="#8B949E" Margin="16,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="StatsUptime" Text="0m" Foreground="White" Margin="8,0,0,0"/>
+                    </WrapPanel>
+                    <Border Background="#161B22" CornerRadius="6" Padding="8" Margin="0,8,0,0">
+                        <TextBlock Text="Tu pojawią się wykresy: tempo progresji, boss defeat rate, resource efficiency." Foreground="#8B949E" TextWrapping="Wrap"/>
+                    </Border>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Wydarzenia">
+                <StackPanel Margin="12">
+                    <TextBlock Text="Tryb wydarzeń" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                    <WrapPanel Margin="0,8,0,0">
+                        <TextBlock Text="Event Mode" Foreground="#8B949E" VerticalAlignment="Center"/>
+                        <ToggleButton x:Name="EventModeToggle" Style="{StaticResource SwitchToggleStyle}" Margin="8,0,0,0" Checked="EventModeToggle_Checked" Unchecked="EventModeToggle_Unchecked"/>
+                    </WrapPanel>
+                    <Border Background="#161B22" CornerRadius="6" Padding="8" Margin="0,8,0,0">
+                        <TextBlock Text="Gdy aktywne: bot oszczędza zasoby i dostosowuje tempo do zadań eventowych (stub)." Foreground="#8B949E" TextWrapping="Wrap"/>
+                    </Border>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+    </Border>
+</Window>
